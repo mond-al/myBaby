@@ -1,5 +1,6 @@
 package com.mond.mealdiapersleep.data
 
+import android.util.Log
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
@@ -16,7 +17,10 @@ interface EventDao {
     fun getFromTo(start: LocalDateTime, finish: LocalDateTime): Flow<List<Event>>
 
     @Query("SELECT * FROM event WHERE start >= :start order by start DESC")
-    fun getFromToNow(start: LocalDateTime): Flow<List<Event>>
+    fun getFlowFromToNow(start: LocalDateTime): Flow<List<Event>>
+
+    @Query("SELECT * FROM event WHERE start >= :start order by start DESC")
+    fun getFromToNow(start: LocalDateTime): List<Event>
 
     @Query("SELECT * FROM event WHERE mId is (:eventId)")
     fun loadAllById(eventId: Int): List<Event>

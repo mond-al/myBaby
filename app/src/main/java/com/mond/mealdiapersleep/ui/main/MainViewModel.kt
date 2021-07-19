@@ -5,19 +5,17 @@ import com.mond.mealdiapersleep.data.Event
 import com.mond.mealdiapersleep.data.EventRepository
 import com.mond.mealdiapersleep.data.EventType
 import kotlinx.coroutines.launch
+import java.time.Duration
 import java.time.LocalDateTime
-import java.time.temporal.Temporal
-import java.util.concurrent.atomic.AtomicBoolean
 
 class MainViewModel(private val repository: EventRepository) : ViewModel() {
 
-    val allData: LiveData<List<Event>> = repository.allEvent.asLiveData()
-    val hour24: LiveData<List<Event>> = repository.today.asLiveData()
-    var dirty = AtomicBoolean(true)
+    val in48Hours: LiveData<List<Event>> = repository.in48hours.asLiveData()
 
-    fun add(type: EventType, time: LocalDateTime, volume: Int = 0) {
+    fun add(type: EventType, time: LocalDateTime,  callback: Runnable?= null, volume: Int = 0) {
         viewModelScope.launch {
             repository.insert(Event(type, time, volume, getPid(type, time)))
+            callback?.run()
         }
     }
 
@@ -35,6 +33,7 @@ class MainViewModel(private val repository: EventRepository) : ViewModel() {
         }
     }
 
-    fun getLastEvent(eventType: EventType): LocalDateTime? = hour24.value?.filter { it.type == eventType }?.maxByOrNull { it.start }?.start
+    fun getLastEvent(eventType: EventType): Event? =
+        repository.getIn48Hours().filter { it.type == eventType }.maxByOrNull { it.start }
 
 }

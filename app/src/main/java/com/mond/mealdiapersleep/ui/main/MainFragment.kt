@@ -9,24 +9,23 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.mond.mealdiapersleep.MainApplication
 import com.mond.mealdiapersleep.R
-import com.mond.mealdiapersleep.data.EventListAdapter
 import com.mond.mealdiapersleep.data.EventRepository
 import com.mond.mealdiapersleep.data.EventType
 import com.mond.mealdiapersleep.databinding.MainFragmentBinding
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import java.time.Duration
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.concurrent.TimeUnit
 
 
 class MainFragment : Fragment() {
+
+    private var updater: Disposable? = null
 
     companion object {
         fun newInstance() = MainFragment()
@@ -46,108 +45,67 @@ class MainFragment : Fragment() {
         }
         val binding = MainFragmentBinding.bind(view)
 
-        binding.meals.also {
-            it.adapter = EventListAdapter(viewModel).apply {
-                registerAdapterDataObserver(createNotiChanged(this, it))
-            }
-            it.layoutManager = LinearLayoutManager(context).apply {
-                reverseLayout = true
-            }
-        }
-        binding.sleeps.also {
-            it.adapter = EventListAdapter(viewModel).apply {
-                registerAdapterDataObserver(createNotiChanged(this, it))
-            }
-            it.layoutManager = LinearLayoutManager(context).apply {
-                reverseLayout = true
-            }
-        }
-        binding.diapers.also {
-            it.adapter = EventListAdapter(viewModel).apply {
-                registerAdapterDataObserver(createNotiChanged(this, it))
-            }
-            it.layoutManager = LinearLayoutManager(context).apply {
-                reverseLayout = true
+        val typeMap = hashMapOf<EventType, TypeView>()
+        typeMap[EventType.Meal] = TypeView(
+            EventType.Meal,
+            binding.meals,
+            binding.lastMeal,
+            binding.nextMeal,
+            binding.btnAddMeal,
+            viewModel = viewModel
+        )
+        typeMap[EventType.Sleep] = TypeView(
+            EventType.Sleep,
+            binding.sleeps,
+            binding.lastSleep,
+            binding.nextSleep,
+            binding.btnAddSleep,
+            viewModel = viewModel
+        )
+        typeMap[EventType.Diaper] = TypeView(
+            EventType.Diaper,
+            binding.diapers,
+            binding.lastDiaper,
+            binding.nextDiaper,
+            binding.btnAddDiaper,
+            viewModel = viewModel
+        )
+
+        typeMap.forEach { type ->
+            type.value.also { tf ->
+                tf.setAdapter()
+                tf.rv.layoutManager = LinearLayoutManager(context).apply {
+                    reverseLayout = true
+                }
+                tf.setAddBtn()
             }
         }
 
-        viewModel.hour24.observe(this) { events ->
-            (binding.meals.adapter as EventListAdapter).submitList(events.filter { it.type == EventType.Meal }
-                .sortedByDescending { it.start }) {
+        viewModel.in48Hours.observe(this) { events ->
+            typeMap.forEach { m ->
+                (m.value.adapter)?.submitList(events.filter { it.type == m.key }
+                    .sortedByDescending { it.start })
+                (m.value.lastTimeView).text =
+                    (events.filter { it.type == m.key }.maxByOrNull { it.start }?.start)?.format(
+                        DateTimeFormatter.ofPattern("a hh시 mm분", Locale.KOREAN)
+                    )
             }
-            (binding.sleeps.adapter as EventListAdapter).submitList(events.filter { it.type == EventType.Sleep }
-                .sortedByDescending { it.start }) {
-            }
-            (binding.diapers.adapter as EventListAdapter).submitList(events.filter { it.type == EventType.Diaper }
-                .sortedByDescending { it.start }) {
-            }
-
-            val lastMealStart =
-                events.filter { it.type == EventType.Meal }.maxByOrNull { it.start }?.start
-            val lastSleepStart =
-                events.filter { it.type == EventType.Sleep }.maxByOrNull { it.start }?.start
-            val lastDiaperStart =
-                events.filter { it.type == EventType.Diaper }.maxByOrNull { it.start }?.start
-
-            binding.lastMeal.text =
-                lastMealStart?.format(DateTimeFormatter.ofPattern("a hh시 mm분", Locale.KOREAN))
-            binding.lastSleep.text =
-                lastSleepStart?.format(DateTimeFormatter.ofPattern("a hh시 mm분", Locale.KOREAN))
-            binding.lastDiaper.text =
-                lastDiaperStart?.format(DateTimeFormatter.ofPattern("a hh시 mm분", Locale.KOREAN))
-
         }
 
-        binding.btnAddMeal.setOnClickListener {
-            viewModel.add(
-                EventType.Meal,
-                LocalDateTime.now(),
-            )
-        }
-        binding.btnAddSleep.setOnClickListener {
-            viewModel.add(
-                EventType.Sleep,
-                LocalDateTime.now(),
-            )
-        }
-        binding.btnAddDiaper.setOnClickListener {
-            viewModel.add(
-                EventType.Diaper,
-                LocalDateTime.now(),
-            )
-        }
-        Observable.interval(10, 10, TimeUnit.SECONDS)
+        updater = Observable.interval(1, 10, TimeUnit.SECONDS)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
-                binding.meals.adapter?.notifyDataSetChanged()
-                binding.sleeps.adapter?.notifyDataSetChanged()
-                binding.diapers.adapter?.notifyDataSetChanged()
-
-                val nextMeal =Duration.between(LocalDateTime.now(),viewModel.getLastEvent(EventType.Meal)?.plusHours(3)).toMinutes()
-                val nextSleep =Duration.between(LocalDateTime.now(),viewModel.getLastEvent(EventType.Sleep)?.plusHours(3)).toMinutes()
-                val nextDiaper =Duration.between(LocalDateTime.now(),viewModel.getLastEvent(EventType.Diaper)?.plusHours(3)).toMinutes()
-
-                binding.nextMeal.text ="$nextMeal 분 남았음"
-                binding.nextSleep.text ="$nextSleep 분 남았음"
-                binding.nextDiaper.text ="$nextDiaper 분 남았음"
+                typeMap.forEach { m ->
+                    m.value.updateTimeLine()
+                }
             }
-
     }
 
-    private fun createNotiChanged(adapter: EventListAdapter, rv: RecyclerView) =
-        object : RecyclerView.AdapterDataObserver() {
-            override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
-                super.onItemRangeRemoved(positionStart, itemCount)
-                if (positionStart > 0)
-                    adapter.notifyItemChanged(positionStart - 1)
-            }
-
-            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                super.onItemRangeInserted(positionStart, itemCount)
-                rv.smoothScrollToPosition(0)
-            }
-        }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        updater?.dispose()
+    }
 }
 
 class MainViewModelFactory(private val repository: EventRepository) :
