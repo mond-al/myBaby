@@ -170,8 +170,5 @@
                 android:layout_weight="1" />
         </androidx.appcompat.widget.LinearLayoutCompat>
 
-
     </LinearLayout>
-
-
 </LinearLayout>

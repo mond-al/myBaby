@@ -6,6 +6,7 @@ import com.mond.mealdiapersleep.data.EventRepository
 import com.mond.mealdiapersleep.data.EventType
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import java.time.temporal.Temporal
 import java.util.concurrent.atomic.AtomicBoolean
 
 class MainViewModel(private val repository: EventRepository) : ViewModel() {
@@ -33,4 +34,7 @@ class MainViewModel(private val repository: EventRepository) : ViewModel() {
             repository.delete(mId)
         }
     }
+
+    fun getLastEvent(eventType: EventType): LocalDateTime? = hour24.value?.filter { it.type == eventType }?.maxByOrNull { it.start }?.start
+
 }

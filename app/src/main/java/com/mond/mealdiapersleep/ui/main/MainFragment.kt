@@ -1,7 +1,6 @@
 package com.mond.mealdiapersleep.ui.main
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,12 +18,11 @@ import com.mond.mealdiapersleep.data.EventType
 import com.mond.mealdiapersleep.databinding.MainFragmentBinding
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
+import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-import java.util.concurrent.Flow
 import java.util.concurrent.TimeUnit
 
 
@@ -48,27 +46,27 @@ class MainFragment : Fragment() {
         }
         val binding = MainFragmentBinding.bind(view)
 
-        binding.meals.apply {
-            adapter = EventListAdapter(viewModel).apply {
-                registerAdapterDataObserver(createNotiChanged())
+        binding.meals.also {
+            it.adapter = EventListAdapter(viewModel).apply {
+                registerAdapterDataObserver(createNotiChanged(this, it))
             }
-            layoutManager = LinearLayoutManager(context).apply {
+            it.layoutManager = LinearLayoutManager(context).apply {
                 reverseLayout = true
             }
         }
-        binding.sleeps.apply {
-            adapter = EventListAdapter(viewModel).apply {
-                registerAdapterDataObserver(createNotiChanged())
+        binding.sleeps.also {
+            it.adapter = EventListAdapter(viewModel).apply {
+                registerAdapterDataObserver(createNotiChanged(this, it))
             }
-            layoutManager = LinearLayoutManager(context).apply {
+            it.layoutManager = LinearLayoutManager(context).apply {
                 reverseLayout = true
             }
         }
-        binding.diapers.apply {
-            adapter = EventListAdapter(viewModel).apply {
-                registerAdapterDataObserver(createNotiChanged())
+        binding.diapers.also {
+            it.adapter = EventListAdapter(viewModel).apply {
+                registerAdapterDataObserver(createNotiChanged(this, it))
             }
-            layoutManager = LinearLayoutManager(context).apply {
+            it.layoutManager = LinearLayoutManager(context).apply {
                 reverseLayout = true
             }
         }
@@ -76,15 +74,12 @@ class MainFragment : Fragment() {
         viewModel.hour24.observe(this) { events ->
             (binding.meals.adapter as EventListAdapter).submitList(events.filter { it.type == EventType.Meal }
                 .sortedByDescending { it.start }) {
-                binding.meals.post { binding.meals.smoothScrollToPosition(0) }
             }
             (binding.sleeps.adapter as EventListAdapter).submitList(events.filter { it.type == EventType.Sleep }
                 .sortedByDescending { it.start }) {
-                binding.sleeps.post { binding.sleeps.smoothScrollToPosition(0) }
             }
             (binding.diapers.adapter as EventListAdapter).submitList(events.filter { it.type == EventType.Diaper }
                 .sortedByDescending { it.start }) {
-                binding.diapers.post { binding.diapers.smoothScrollToPosition(0) }
             }
 
             val lastMealStart =
@@ -128,18 +123,29 @@ class MainFragment : Fragment() {
                 binding.meals.adapter?.notifyDataSetChanged()
                 binding.sleeps.adapter?.notifyDataSetChanged()
                 binding.diapers.adapter?.notifyDataSetChanged()
-                viewModel.dirty.set(false)
-            }
 
+                val nextMeal =Duration.between(LocalDateTime.now(),viewModel.getLastEvent(EventType.Meal)?.plusHours(3)).toMinutes()
+                val nextSleep =Duration.between(LocalDateTime.now(),viewModel.getLastEvent(EventType.Sleep)?.plusHours(3)).toMinutes()
+                val nextDiaper =Duration.between(LocalDateTime.now(),viewModel.getLastEvent(EventType.Diaper)?.plusHours(3)).toMinutes()
+
+                binding.nextMeal.text ="$nextMeal 분 남았음"
+                binding.nextSleep.text ="$nextSleep 분 남았음"
+                binding.nextDiaper.text ="$nextDiaper 분 남았음"
+            }
 
     }
 
-    private fun EventListAdapter.createNotiChanged() =
+    private fun createNotiChanged(adapter: EventListAdapter, rv: RecyclerView) =
         object : RecyclerView.AdapterDataObserver() {
             override fun onItemRangeRemoved(positionStart: Int, itemCount: Int) {
                 super.onItemRangeRemoved(positionStart, itemCount)
                 if (positionStart > 0)
-                    notifyItemChanged(positionStart - 1)
+                    adapter.notifyItemChanged(positionStart - 1)
+            }
+
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                super.onItemRangeInserted(positionStart, itemCount)
+                rv.smoothScrollToPosition(0)
             }
         }
 }
