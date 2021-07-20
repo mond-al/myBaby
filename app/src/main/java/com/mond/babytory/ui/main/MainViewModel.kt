@@ -1,9 +1,9 @@
-package com.mond.mealdiapersleep.ui.main
+package com.mond.babytory.ui.main
 
 import androidx.lifecycle.*
-import com.mond.mealdiapersleep.data.Event
-import com.mond.mealdiapersleep.data.EventRepository
-import com.mond.mealdiapersleep.data.EventType
+import com.mond.babytory.data.Event
+import com.mond.babytory.data.EventRepository
+import com.mond.babytory.data.EventType
 import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.LocalDateTime

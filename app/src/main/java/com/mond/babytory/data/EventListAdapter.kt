@@ -1,4 +1,4 @@
-package com.mond.mealdiapersleep.data
+package com.mond.babytory.data
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
@@ -10,8 +10,8 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mond.mealdiapersleep.R
-import com.mond.mealdiapersleep.data.EventListAdapter.EventViewHolder
-import com.mond.mealdiapersleep.ui.main.MainViewModel
+import com.mond.babytory.data.EventListAdapter.EventViewHolder
+import com.mond.babytory.ui.main.MainViewModel
 import kotlinx.coroutines.*
 import java.time.Duration
 import java.time.LocalDateTime
@@ -64,9 +64,9 @@ class EventListAdapter(val viewModel: MainViewModel) :
                 dateTime.format(DateTimeFormatter.ofPattern("a hh시 mm분", Locale.KOREAN))
 
            when(event.type){
-               EventType.Meal-> volume.text = "${event.volume} ml"
-               EventType.Sleep-> volume.text = if(event.volume>0) "잠듬" else "일어남"
-               EventType.Diaper-> volume.text = if(event.volume>0) "대변" else "소변"
+               EventType.Meal -> volume.text = "${event.volume} ml"
+               EventType.Sleep -> volume.text = if(event.volume>0) "잠듬" else "일어남"
+               EventType.Diaper -> volume.text = if(event.volume>0) "대변" else "소변"
                else -> {}
            }
 

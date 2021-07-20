@@ -1,4 +1,4 @@
-package com.mond.mealdiapersleep.data
+package com.mond.babytory.data
 
 import android.content.Context
 import androidx.room.Database

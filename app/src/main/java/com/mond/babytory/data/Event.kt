@@ -1,4 +1,4 @@
-package com.mond.mealdiapersleep.data
+package com.mond.babytory.data
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

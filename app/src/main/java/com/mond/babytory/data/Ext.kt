@@ -1,4 +1,4 @@
-package com.mond.mealdiapersleep.data
+package com.mond.babytory.data
 
 import android.content.res.Resources
 import android.util.TypedValue

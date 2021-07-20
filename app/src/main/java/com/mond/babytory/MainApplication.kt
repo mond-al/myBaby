@@ -1,8 +1,8 @@
-package com.mond.mealdiapersleep
+package com.mond.babytory
 
 import android.app.Application
-import com.mond.mealdiapersleep.data.EventDatabase
-import com.mond.mealdiapersleep.data.EventRepository
+import com.mond.babytory.data.EventDatabase
+import com.mond.babytory.data.EventRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 

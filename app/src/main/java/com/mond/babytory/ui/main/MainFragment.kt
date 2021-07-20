@@ -1,4 +1,4 @@
-package com.mond.mealdiapersleep.ui.main
+package com.mond.babytory.ui.main
 
 import android.app.Dialog
 import android.os.Bundle
@@ -13,11 +13,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.mond.mealdiapersleep.MainApplication
+import com.mond.babytory.MainApplication
 import com.mond.mealdiapersleep.R
-import com.mond.mealdiapersleep.data.EventListAdapter
-import com.mond.mealdiapersleep.data.EventRepository
-import com.mond.mealdiapersleep.data.EventType
+import com.mond.babytory.data.EventListAdapter
+import com.mond.babytory.data.EventRepository
+import com.mond.babytory.data.EventType
 import com.mond.mealdiapersleep.databinding.MainFragmentBinding
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers

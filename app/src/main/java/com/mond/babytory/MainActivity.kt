@@ -1,8 +1,9 @@
-package com.mond.mealdiapersleep
+package com.mond.babytory
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.mond.mealdiapersleep.ui.main.MainFragment
+import com.mond.mealdiapersleep.R
+import com.mond.babytory.ui.main.MainFragment
 
 class MainActivity : AppCompatActivity() {
 

@@ -1,4 +1,4 @@
-package com.mond.mealdiapersleep.data
+package com.mond.babytory.data
 
 enum class EventType(private val str: String) {
     Meal("meal"), Diaper("diaper"), Sleep("sleep"),Unknown("unknown");
@@ -8,7 +8,7 @@ enum class EventType(private val str: String) {
     }
 
     companion object{
-        fun valueOf(str: String?): EventType{
+        fun valueOf(str: String?): EventType {
             for(type in values()){
                 if(type.str == str)
                     return type

@@ -1,4 +1,4 @@
-package com.mond.mealdiapersleep.data
+package com.mond.babytory.data
 
 import androidx.room.TypeConverter
 import java.time.LocalDateTime
