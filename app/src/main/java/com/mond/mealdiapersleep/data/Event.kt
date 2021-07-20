@@ -7,15 +7,15 @@ import java.time.LocalDateTime
 
 @Entity
 data class Event constructor(
-    @PrimaryKey(autoGenerate = true) val mId: Int=0,
-    @ColumnInfo(name = "pId") val pId: Int ,
+    @PrimaryKey(autoGenerate = true) val mId: Int = 0,
+    @ColumnInfo(name = "pId") val pId: Int,
     @ColumnInfo(name = "type") val type: EventType,
     @ColumnInfo(name = "start") val start: LocalDateTime,
-    @ColumnInfo(name = "volume") val volume: Int?
+    @ColumnInfo(name = "volume") val volume: Int = 0
 ) {
-    constructor(type: EventType, start: LocalDateTime, volume: Int?,pId: Int?) : this(
+    constructor(type: EventType, start: LocalDateTime, volume: Int, pId: Int?) : this(
         0,
-        pId?:-1,
+        pId ?: -1,
         type,
         start,
         volume

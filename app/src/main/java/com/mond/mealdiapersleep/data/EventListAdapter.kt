@@ -37,7 +37,7 @@ class EventListAdapter(val viewModel: MainViewModel) :
         private val wrapper: View = itemView.findViewById(R.id.wrapper)
         private val beforeTime: TextView = itemView.findViewById(R.id.before_now)
         private val eventTime: TextView = itemView.findViewById(R.id.event_time)
-        private val volume: TextView = itemView.findViewById(R.id.volume)
+        private val volume: TextView = itemView.findViewById(R.id.seek_vol)
 
         @SuppressLint("SetTextI18n")
         fun bind(viewModel: MainViewModel, event: Event) {
@@ -50,8 +50,8 @@ class EventListAdapter(val viewModel: MainViewModel) :
             val prevEventGapMinute = previousEventGap.toMinutes()
             gap.minimumHeight = (if (prevEventGapMinute > 100) 100 else prevEventGapMinute).dp2px()
             gapTime.text = when {
-                prevEventGapMinute >= 60 -> String.format("%d시간 %d분전", prevEventGapMinute / 60, (prevEventGapMinute % 60))
-                else -> String.format("%d분전", (prevEventGapMinute))
+                prevEventGapMinute >= 60 -> String.format("%d시간 %d분", prevEventGapMinute / 60, (prevEventGapMinute % 60))
+                else -> String.format("%d분", (prevEventGapMinute))
             }
 
             val fromNow = Duration.between(event.start, LocalDateTime.now()).toMinutes()
@@ -63,12 +63,12 @@ class EventListAdapter(val viewModel: MainViewModel) :
             eventTime.text =
                 dateTime.format(DateTimeFormatter.ofPattern("a hh시 mm분", Locale.KOREAN))
 
-//            if (event.volume == null || EventType.Diaper == event.type) {
-//                volume.visibility = View.GONE
-//            } else {
-//                volume.visibility = View.VISIBLE
-//                volume.text = event.volume.toString() + getUnit(event)
-//            }
+           when(event.type){
+               EventType.Meal-> volume.text = "${event.volume} ml"
+               EventType.Sleep-> volume.text = if(event.volume>0) "잠듬" else "일어남"
+               EventType.Diaper-> volume.text = if(event.volume>0) "대변" else "소변"
+               else -> {}
+           }
 
             wrapper.requestLayout()
             wrapper.setOnLongClickListener {
